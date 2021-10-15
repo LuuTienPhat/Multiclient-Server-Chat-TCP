@@ -1,6 +1,5 @@
 package SwingApp;
 
-
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -40,17 +39,11 @@ public class Client extends javax.swing.JFrame {
     }
 
     public void excute() throws IOException {
-        Scanner sc = new Scanner(System.in);
-//        System.out.println("Nhập vào tên của bạn");
-//        String name = sc.nextLine();
-
         client = new Socket(host, port);
         ReadClient read = new ReadClient(client);
         read.start();
 
         dataOutputStream = new DataOutputStream(client.getOutputStream());
-//        WriteClient write = new WriteClient(client, name);
-//        write.start();
     }
 
     /**
@@ -84,7 +77,7 @@ public class Client extends javax.swing.JFrame {
         txtName.setToolTipText("Nhập tên");
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        jLabel1.setText("Nhập tên");
+        jLabel1.setText("Enter your name:");
 
         txtChat.setColumns(20);
         txtChat.setRows(5);
@@ -153,18 +146,16 @@ public class Client extends javax.swing.JFrame {
     private void btnSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSendActionPerformed
         // TODO add your handling code here:
         String message = txtMessage.getText();
-        if (message.isEmpty()) {
-            return;
-        } else {
+        try {
+            message = username + ": " + message;
             addToChatBox(message);
+            txtMessage.setText("");
+            dataOutputStream.writeUTF(message);
 
-            try {
-                dataOutputStream.writeUTF(message);
-            } catch (IOException ex) {
-                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+            JOptionPane.showMessageDialog(null, "Server not found!");
         }
-
     }//GEN-LAST:event_btnSendActionPerformed
 
     private void addToChatBox(String message) {
@@ -175,7 +166,7 @@ public class Client extends javax.swing.JFrame {
         username = txtName.getText();
         if (username.isEmpty())
             JOptionPane.showMessageDialog(null, "Xin hãy nhập tên");
-        
+
         else {
             try {
                 excute();
@@ -183,10 +174,18 @@ public class Client extends javax.swing.JFrame {
                 txtMessage.setEnabled(true);
                 btnSend.setEnabled(true);
                 addToChatBox(username + " has joined group chat.");
+
+            } catch (IOException e) {
+                try {
+                    dataOutputStream.close();
+                    client.close();
+                    
+                    JOptionPane.showMessageDialog(null, "Server not found!");
+                } catch (IOException ex) {
+                     System.err.println(e.getMessage());
+                     System.err.println(ex.getMessage());
+                }
                 
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(null, "Server not found!");
-                System.err.println(ex.getMessage());
             }
         }
     }//GEN-LAST:event_btnConnectActionPerformed
