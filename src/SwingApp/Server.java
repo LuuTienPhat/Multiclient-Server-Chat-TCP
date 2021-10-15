@@ -1,7 +1,6 @@
 package SwingApp;
 
 
-import ConsoleApp.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -14,11 +13,11 @@ import java.util.Scanner;
  *
  * @author Phat
  */
-public class Server2 {
+public class Server {
     private final int port;
     public static ArrayList<Socket> clientList;
 
-    public Server2(int port) {
+    public Server(int port) {
         this.port = port;
     }
 
@@ -31,7 +30,7 @@ public class Server2 {
         while (true) {
             Socket socket = server.accept();
             System.out.println("Đã kết nối với " + socket);
-            Server2.clientList.add(socket);
+            Server.clientList.add(socket);
             ReadServer read = new ReadServer(socket);
             read.start();
         }
@@ -39,8 +38,8 @@ public class Server2 {
     }
 
     public static void main(String[] args) throws IOException {
-        Server2.clientList = new ArrayList<>();
-        Server2 server = new Server2(1234);
+        Server.clientList = new ArrayList<>();
+        Server server = new Server(1234);
         server.excute();
     }
 }
@@ -54,7 +53,7 @@ class WriteServer extends Thread {
         while (true) {
             String message = sc.nextLine();
             try {
-                for (Socket client : Server2.clientList) {
+                for (Socket client : Server.clientList) {
                     dos = new DataOutputStream(client.getOutputStream());
                     dos.writeUTF("Server: " + message);
                 }
@@ -81,14 +80,14 @@ class ReadServer extends Thread {
             while (true) {
                 String message = dis.readUTF();
                 if (message.contains("exit")) {
-                    Server2.clientList.remove(client);
+                    Server.clientList.remove(client);
                     System.out.println("Đã ngắt kết nối với" + client);
                     dis.close();
                     client.close();
                     continue;
                 }
 
-                for (Socket c : Server2.clientList) {
+                for (Socket c : Server.clientList) {
                     if (c.getPort() != client.getPort()) {
                         DataOutputStream dos = new DataOutputStream(c.getOutputStream());
                         dos.writeUTF(message);
