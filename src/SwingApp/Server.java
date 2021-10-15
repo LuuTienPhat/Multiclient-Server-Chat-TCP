@@ -1,6 +1,5 @@
 package SwingApp;
 
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,12 +7,15 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Phat
  */
 public class Server {
+
     private final int port;
     public static ArrayList<Socket> clientList;
 
@@ -75,8 +77,7 @@ class ReadServer extends Thread {
 
     @Override
     public void run() {
-        try {
-            DataInputStream dis = new DataInputStream(client.getInputStream());
+        try (DataInputStream dis = new DataInputStream(client.getInputStream())) {
             while (true) {
                 String message = dis.readUTF();
                 if (message.contains("exit")) {
@@ -96,7 +97,15 @@ class ReadServer extends Thread {
                 System.out.println(message);
             }
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            try {
+                client.close();
+                Server.clientList.remove(client);
+                System.out.println("Đã ngắt kết nối với" + client);
+                System.err.println(e.toString());
+            } catch (IOException ex) {
+                Logger.getLogger(ReadServer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
         }
     }
 
