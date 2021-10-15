@@ -1,4 +1,7 @@
+package SwingApp;
 
+
+import ConsoleApp.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -61,7 +64,6 @@ class WriteServer extends Thread {
         }
 
     }
-
 }
 
 class ReadServer extends Thread {
